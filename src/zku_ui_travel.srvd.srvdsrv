@@ -1,0 +1,5 @@
+@EndUserText.label: 'Travel'
+define service ZKU_UI_TRAVEL {
+  expose ZKU_C_Travel  as Travel;
+  expose ZKU_C_Booking as Booking;
+}

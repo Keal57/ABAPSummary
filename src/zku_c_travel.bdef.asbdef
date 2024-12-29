@@ -1,0 +1,30 @@
+projection;
+strict ( 2 );
+use draft;
+
+define behavior for ZKU_C_Travel alias Travel
+{
+  use create;
+  use update;
+  use delete;
+
+  use association _Bookings { create; with draft; }
+
+  use action ShowTestMessage;
+  use action CancelTravel;
+  use action MaintainBookingFee;
+
+  use action Activate;
+  use action Edit;
+  use action Discard;
+  use action Prepare;
+  use action Resume;
+}
+
+define behavior for ZKU_C_Booking alias Booking
+{
+  use update;
+  use delete;
+
+  use association _Travel { with draft; }
+}

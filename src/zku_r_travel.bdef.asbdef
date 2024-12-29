@@ -1,0 +1,93 @@
+managed implementation in class zbp_ku_r_travel unique;
+strict ( 2 );
+with draft;
+
+define behavior for ZKU_R_Travel alias Travel
+persistent table zku_travel_a
+draft table zku_travel_d
+lock master
+total etag LastChangedAt
+authorization master ( instance )
+//etag master <field_name>
+{
+  create;
+  update;
+  delete;
+
+  association _Bookings { create; with draft; }
+
+  static action ShowTestMessage;
+  action CancelTravel result [1] $self;
+  action MaintainBookingFee parameter ZKU_A_BookingFee result [1] $self;
+
+  draft action Activate optimized;
+  draft action Discard;
+  draft action Edit;
+  draft determine action Prepare
+  {
+    validation ValidateDates;
+    validation ValidateCustomer;
+    validation ValidateAgency;
+  }
+  draft action Resume;
+
+  validation ValidateDates on save { create; }
+  validation ValidateCustomer on save { create; }
+  validation ValidateAgency on save { create; }
+
+  determination DetermineStatus on modify { create; }
+  determination DetermineTravelId on modify { create; }
+
+  field ( readonly, numbering : managed ) TravelUuid;
+  field ( mandatory : create ) AgencyId, BeginDate, CustomerId, Description, EndDate;
+  field ( readonly : update ) AgencyId, BeginDate, CustomerId, Description, EndDate;
+  field ( readonly ) CreatedAt, CreatedBy, LastChangedAt, LastChangedBy, Status, TravelId;
+
+  mapping for zku_travel_a corresponding
+  {
+    AgencyId = agency_id;
+    BeginDate = begin_date;
+    BookingFee = booking_fee;
+    CreatedAt = created_at;
+    CreatedBy = created_by;
+    CurrencyCode = currency_code;
+    CustomerId = customer_id;
+    Description = description;
+    EndDate = end_date;
+    LastChangedAt = last_changed_at;
+    LastChangedBy = last_changed_by;
+    Status = status;
+    TotalPrice = total_price;
+    TravelId = travel_id;
+    TravelUuid = travel_uuid;
+  }
+}
+
+define behavior for ZKU_R_Booking alias Booking
+persistent table zku_booking_a
+lock dependent by _Travel
+draft table zku_booking_d
+authorization dependent by _Travel
+//etag master <field_name>
+{
+  update;
+  delete;
+
+  association _Travel { with draft; }
+
+  field ( readonly, numbering : managed ) BookingUuid;
+  field ( readonly ) TravelUuid;
+
+  mapping for zku_booking_a corresponding
+  {
+    BookingDate = booking_Date;
+    BookingId = booking_id;
+    BookingUuid = booking_uuid;
+    CarrierId = carrier_id;
+    ConnectionId = connection_id;
+    CurrencyCode = currency_code;
+    FlightDate = flight_date;
+    FlightPrice = flight_price;
+    TravelUuid = Travel_uuid;
+  }
+}
